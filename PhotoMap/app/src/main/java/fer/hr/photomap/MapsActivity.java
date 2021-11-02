@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -33,7 +34,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ActivityMapsBinding binding;
     View mapView;
     FloatingActionButton customLocationButton;
+    FloatingActionButton addItemButton;
     private View defaultlocationButton;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,8 +75,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+       // mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         defaultlocationButton = mapFragment.getView().findViewById(0x2);
         // Change the visibility of my location button
@@ -82,6 +86,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if(mMap != null && defaultlocationButton != null) defaultlocationButton.callOnClick(); //custom location button activates default location button functionality
+            }
+        });
+
+        findViewById(R.id.addItemButton).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onClick(View v) {
+                Intent intentNextActivity = new Intent(getBaseContext(), AddItem.class);
+                intentNextActivity.putExtra("latitude", mMap.getMyLocation().getLatitude() );
+                intentNextActivity.putExtra("longitude", mMap.getMyLocation().getLatitude() );
+                startActivity(intentNextActivity);
             }
         });
     }
