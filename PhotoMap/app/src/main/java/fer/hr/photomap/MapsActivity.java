@@ -8,18 +8,24 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -73,10 +79,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.setInfoWindowAdapter(new MarkerInfoAdapter(this));
+
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-       // mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng sydneyLatLng = new LatLng(-34, 151);
+        Marker mark1 = mMap.addMarker(new MarkerOptions().position(new LatLng(-33.87365, 151.20689))
+                .title("Marker1")
+                .snippet("Full river")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+        Marker mark2 = mMap.addMarker(new MarkerOptions().position(new LatLng(-35.87365, 161.20689))
+                .title("Marker2")
+                .snippet("Dried out")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydneyLatLng));
 
         defaultlocationButton = mapFragment.getView().findViewById(0x2);
         // Change the visibility of my location button

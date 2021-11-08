@@ -69,7 +69,7 @@ public class AddItem extends AppCompatActivity {
                 ImagePicker.Companion.with(AddItem.this)
                         .provider(ImageProvider.CAMERA)
                         //.crop(1f, 1f) //omogucava cropanje po x:y formatu (1:1, 16:9, ...)
-                        .compress(2048)//maksimalna velicina slike u KB
+                        .compress(4096)//maksimalna velicina slike u KB
                         .start();
             }
         });
@@ -83,7 +83,7 @@ public class AddItem extends AppCompatActivity {
                 ImagePicker.Companion.with(AddItem.this)
                         .provider(ImageProvider.GALLERY)
                         //.crop(1f, 1f) //omogucava cropanje po x:y formatu (1:1, 16:9, ...)
-                        .compress(2048)//maksimalna velicina slike u KB
+                        .compress(4096)//maksimalna velicina slike u KB
                         .start();
             }
         });
