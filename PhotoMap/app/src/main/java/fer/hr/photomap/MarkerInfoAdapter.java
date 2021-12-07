@@ -3,6 +3,8 @@ package fer.hr.photomap;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,6 +13,9 @@ import android.widget.TextView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
 
@@ -39,15 +44,28 @@ class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
         TextView tv1 = (TextView) v.findViewById(R.id.textView1);
         TextView tv2 = (TextView) v.findViewById(R.id.textView2);
         String title=arg0.getTitle();
-        String informations=arg0.getSnippet();
+        String snippetData=arg0.getSnippet();
 
         tv1.setText(title);
-        tv2.setText(informations);
-        ImageView im = (ImageView) v.findViewById(R.id.imageView1);
-        Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.grom);
-        im.setImageBitmap(bm);
+        tv2.setText("filler");
+        if(snippetData != null) {
+            ImageView im = (ImageView) v.findViewById(R.id.imageView1);
+            // Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.grom);
+            Bitmap image = decodeBase64(snippetData);
+            im.setImageBitmap(image);
+        }
+        //im.setImageURI(Uri.parse(snippetData));
 
         return v;
 
+    }
+
+    private Bitmap decodeBase64(String completeImageData) {
+
+        InputStream stream = new ByteArrayInputStream(Base64.decode(completeImageData.getBytes(), Base64.DEFAULT));
+
+        Bitmap bitmap = BitmapFactory.decodeStream(stream);
+
+        return bitmap;
     }
 }

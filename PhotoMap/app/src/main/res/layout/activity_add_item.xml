@@ -6,40 +6,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/longitudeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Longitude ="
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/descriptionText"
-        app:layout_constraintTop_toBottomOf="@+id/descriptionText" />
-
     <ImageView
         android:id="@+id/imageShow"
-        android:layout_width="414dp"
-        android:layout_height="495dp"
-        android:layout_marginTop="94dp"
-        android:layout_marginBottom="90dp"
+        android:layout_width="410dp"
+        android:layout_height="459dp"
+        android:layout_marginBottom="68dp"
+        android:background="#00F44336"
         app:layout_constraintBottom_toBottomOf="@+id/galleryButton"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/latitudeText"
-        app:layout_constraintVertical_bias="0.907"
         app:srcCompat="@drawable/placeholder_image_foreground" />
-
-    <TextView
-        android:id="@+id/latitudeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Latitude ="
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/descriptionText"
-        app:layout_constraintHorizontal_bias="0.578"
-        app:layout_constraintStart_toStartOf="@+id/descriptionText"
-        app:layout_constraintTop_toBottomOf="@+id/descriptionText" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -89,14 +66,26 @@
 
     <EditText
         android:id="@+id/descriptionText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="88dp"
+        android:layout_width="317dp"
+        android:layout_height="56dp"
         android:layout_marginTop="12dp"
         android:ems="10"
+        android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         android:hint="Description"
-        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="234dp"
+        android:layout_height="30dp"
+        android:background="#1B121111"
+        android:backgroundTint="#120E0E"
+        app:layout_constraintBottom_toTopOf="@+id/imageShow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/descriptionText"
+        app:layout_constraintVertical_bias="0.523" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

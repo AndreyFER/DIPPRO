@@ -1,6 +1,7 @@
 package fer.hr.photomap;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.location.LocationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
@@ -12,7 +13,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -21,6 +24,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -28,6 +32,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 import fer.hr.photomap.databinding.ActivityMapsBinding;
 
@@ -42,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FloatingActionButton customLocationButton;
     FloatingActionButton addItemButton;
     private View defaultlocationButton;
+    ArrayList<Float> hueList = new ArrayList<Float>();
 
 
     @Override
@@ -56,6 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
+
+        addHuesToList();
 
     }
 
@@ -85,12 +96,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydneyLatLng = new LatLng(-34, 151);
         Marker mark1 = mMap.addMarker(new MarkerOptions().position(new LatLng(-33.87365, 151.20689))
                 .title("Marker1")
-                .snippet("Full river")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
         Marker mark2 = mMap.addMarker(new MarkerOptions().position(new LatLng(-35.87365, 161.20689))
                 .title("Marker2")
-                .snippet("Dried out")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydneyLatLng));
 
@@ -110,10 +119,59 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Intent intentNextActivity = new Intent(getBaseContext(), AddItem.class);
-                intentNextActivity.putExtra("latitude", mMap.getMyLocation().getLatitude() );
-                intentNextActivity.putExtra("longitude", mMap.getMyLocation().getLatitude() );
-                startActivity(intentNextActivity);
+                LatLng latlng = getCurrentLocation();
+                intentNextActivity.putExtra("latitude", latlng.latitude );
+                intentNextActivity.putExtra("longitude", latlng.longitude );
+                startActivityForResult(intentNextActivity, 40);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
+                                    Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == 40 &&
+                resultCode == RESULT_OK) {
+            String lat = intent.getStringExtra("lat");
+            String lon = intent.getStringExtra("lon");
+            int type = intent.getIntExtra("type", 0) % 9;
+            String imageUriString = intent.getStringExtra("image");
+            String description = intent.getStringExtra("description");
+            Uri imageUri = Uri.parse(imageUriString);
+
+            Marker mark = mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(lat) , Double.parseDouble(lon) ))
+                    .title(description)
+                    .snippet(imageUriString)
+                    .icon(BitmapDescriptorFactory.defaultMarker(hueList.get(type))));
+        }
+    }
+    private boolean isLocationEnabled(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return LocationManagerCompat.isLocationEnabled(locationManager);
+    }
+
+    //Getting current location
+    private LatLng getCurrentLocation() {
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        String locationProvider;
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) locationProvider = LocationManager.NETWORK_PROVIDER;
+        else if( locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) locationProvider = LocationManager.GPS_PROVIDER;
+        else return null;
+        @SuppressLint("MissingPermission") android.location.Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+        return new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+    }
+    private void addHuesToList() {
+        hueList.add(BitmapDescriptorFactory.HUE_AZURE);
+        hueList.add(BitmapDescriptorFactory.HUE_BLUE);
+        hueList.add(BitmapDescriptorFactory.HUE_CYAN);
+        hueList.add(BitmapDescriptorFactory.HUE_GREEN);
+        hueList.add(BitmapDescriptorFactory.HUE_MAGENTA);
+        hueList.add(BitmapDescriptorFactory.HUE_ORANGE);
+        hueList.add(BitmapDescriptorFactory.HUE_RED);
+        hueList.add(BitmapDescriptorFactory.HUE_ROSE);
+        hueList.add(BitmapDescriptorFactory.HUE_VIOLET);
+        hueList.add(BitmapDescriptorFactory.HUE_YELLOW 	);
     }
 }
