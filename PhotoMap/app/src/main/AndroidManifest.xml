@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="fer.hr.photomap">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -23,7 +24,8 @@
             android:name=".MarkerInfoAdapter"
             android:exported="false"
             android:label="@string/title_activity_marker_info_adapter"
-            android:theme="@style/Theme.PhotoMap.NoActionBar" />
+            android:theme="@style/Theme.PhotoMap.NoActionBar"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".AddItem"
             android:exported="false" />
