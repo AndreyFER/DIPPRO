@@ -6,16 +6,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <EditText
+        android:id="@+id/latitudeText"
+        android:layout_width="144dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="98dp"
+        android:layout_marginBottom="45dp"
+        android:hint="Latitude"
+        android:textSize="16sp"
+        android:inputType="numberDecimal|numberSigned"
+        app:layout_constraintBottom_toTopOf="@+id/imageShow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.545" />
+
+    <EditText
+        android:id="@+id/longitudeText"
+        android:layout_width="171dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="20dp"
+        android:hint="Longitude"
+        android:textSize="16sp"
+        android:inputType="numberDecimal|numberSigned"
+        app:layout_constraintBottom_toTopOf="@+id/spinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.896"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <ImageView
         android:id="@+id/imageShow"
-        android:layout_width="410dp"
-        android:layout_height="459dp"
-        android:layout_marginBottom="68dp"
+        android:layout_width="412dp"
+        android:layout_height="420dp"
+        android:layout_marginBottom="84dp"
         android:background="#00F44336"
-        app:layout_constraintBottom_toBottomOf="@+id/galleryButton"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/latitudeText"
         app:srcCompat="@drawable/placeholder_image_foreground" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -69,8 +99,8 @@
         android:layout_width="317dp"
         android:layout_height="56dp"
         android:layout_marginTop="12dp"
-        android:ems="10"
         android:digits="abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        android:ems="10"
         android:hint="Description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,8 +114,9 @@
         android:backgroundTint="#120E0E"
         app:layout_constraintBottom_toTopOf="@+id/imageShow"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/descriptionText"
-        app:layout_constraintVertical_bias="0.523" />
+        app:layout_constraintVertical_bias="0.866" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

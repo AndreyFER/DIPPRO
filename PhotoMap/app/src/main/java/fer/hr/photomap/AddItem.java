@@ -5,6 +5,7 @@ import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.github.dhaval2404.imagepicker.constant.ImageProvider;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,8 +27,12 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+
+import fer.hr.photomap.data.model.EventData;
 
 public class AddItem extends AppCompatActivity {
+    Context context = this;
     FloatingActionButton cameraButton;
     FloatingActionButton galleryButton;
     FloatingActionButton saveButton;
@@ -35,10 +40,13 @@ public class AddItem extends AppCompatActivity {
     private static String PROVIDER;
     Uri imageUri;
     EditText descriptionText;
+    EditText latitudeText;
+    EditText longitudeText;
     ImageView imageShow;
     boolean imageSet = false;
-    String latitude;
-    String longitude;
+    Double latitude;
+    Double longitude;
+    boolean locationEnabled;
     private static final int READ_EXTERNAL_STORAGE_PERMISSION_CODE = 1000;
     private static final int CAMERA_PERMISSION_CODE = 1001;
 
@@ -47,8 +55,54 @@ public class AddItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
 
-        latitude = Double.toString(getIntent().getDoubleExtra("latitude", 0));
-        longitude = Double.toString(getIntent().getDoubleExtra("longitude", 0));
+        latitude = getIntent().getDoubleExtra("latitude", 0);
+        longitude = getIntent().getDoubleExtra("longitude", 0);
+
+        latitudeText = (EditText) findViewById(R.id.latitudeText);
+        latitudeText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(imageSet && descriptionText.getText().length() > 0){
+                    if(!locationEnabled && latitudeText.getText().length() > 0 && longitudeText.getText().length() > 0)
+                        saveButton.setEnabled(true);
+                    else if (locationEnabled) saveButton.setEnabled(true);
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        longitudeText = (EditText) findViewById(R.id.longitudeText);
+        longitudeText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(imageSet && descriptionText.getText().length() > 0){
+                    if(!locationEnabled && latitudeText.getText().length() > 0 && longitudeText.getText().length() > 0)
+                        saveButton.setEnabled(true);
+                    else if (locationEnabled) saveButton.setEnabled(true);
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        locationEnabled = latitude != 0 && longitude != 0;
+        if(!locationEnabled){
+            latitudeText.setEnabled(true);
+            latitudeText.setVisibility(View.VISIBLE);
+            longitudeText.setEnabled(true);
+            longitudeText.setVisibility(View.VISIBLE);
+            Toast.makeText(getApplicationContext(),
+                    "Location unavailable. Please enter latitude/longitude manually.",
+                    Toast.LENGTH_LONG).show();
+        } else{
+            latitudeText.setEnabled(false);
+            latitudeText.setVisibility(View.GONE);
+            longitudeText.setEnabled(false);
+            longitudeText.setVisibility(View.GONE);
+        }
 
         descriptionText = (EditText) findViewById(R.id.descriptionText);
         descriptionText.addTextChangedListener(new TextWatcher() {
@@ -57,7 +111,11 @@ public class AddItem extends AppCompatActivity {
 
             }
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(imageSet && descriptionText.getText().length() > 0) saveButton.setEnabled(true);
+                if(imageSet && descriptionText.getText().length() > 0){
+                    if(!locationEnabled && latitudeText.getText().length() > 0 && longitudeText.getText().length() > 0)
+                        saveButton.setEnabled(true);
+                    else if (locationEnabled) saveButton.setEnabled(true);
+                }
             }
 
             @Override
@@ -65,6 +123,7 @@ public class AddItem extends AppCompatActivity {
 
             }
         });
+
         saveButton = (FloatingActionButton) findViewById(R.id.saveButton);
         saveButton.setEnabled(false);
         saveButton .setOnClickListener(new View.OnClickListener() {
@@ -73,10 +132,11 @@ public class AddItem extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.putExtra("lat", latitude);
                 intent.putExtra("lon", longitude);
-                intent.putExtra("type", spinner.getSelectedItemPosition());
+                intent.putExtra("typeIndex", spinner.getSelectedItemPosition());
+                intent.putExtra("typeString", spinner.getSelectedItem().toString());
                 intent.putExtra("description", descriptionText.getText().toString());
                 try {
-                    intent.putExtra("image", getBase64String(imageUri));
+                    intent.putExtra("image", Utils.getBase64String(imageUri, context));
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -93,8 +153,7 @@ public class AddItem extends AppCompatActivity {
                 Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 ImagePicker.Companion.with(AddItem.this)
                         .provider(ImageProvider.CAMERA)
-                        //.crop(1f, 1f) //omogucava cropanje po x:y formatu (1:1, 16:9, ...)
-                        .compress(4096)//maksimalna velicina slike u KB
+                        .compress(1048)//maksimalna velicina slike u KB
                         .maxResultSize(576,576)
                         .start();
             }
@@ -108,9 +167,8 @@ public class AddItem extends AppCompatActivity {
                 Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 ImagePicker.Companion.with(AddItem.this)
                         .provider(ImageProvider.GALLERY)
-                        //.crop(1f, 1f) //omogucava cropanje po x:y formatu (1:1, 16:9, ...)
-                        .compress(4096)//maksimalna velicina slike u KB
-                        .maxResultSize(576,576)
+                        .compress(1048)//maksimalna velicina slike u KB
+                        .maxResultSize(356,356)
                         .start();
             }
         });
@@ -122,6 +180,7 @@ public class AddItem extends AppCompatActivity {
                 R.array.types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
 
     }
 
@@ -136,9 +195,10 @@ public class AddItem extends AppCompatActivity {
                 imageShow.setImageURI(imageUri);
                 imageSet = true;
 
-                if (descriptionText.getText().toString().length()>0 && !saveButton.isEnabled()) //if user has entered a description
-                {
-                    saveButton.setEnabled(true);
+                if(imageSet && descriptionText.getText().length() > 0){
+                    if(!locationEnabled && latitudeText.getText().length() > 0 && longitudeText.getText().length() > 0)
+                        saveButton.setEnabled(true);
+                    else if (locationEnabled) saveButton.setEnabled(true);
                 }
                 //You can get File object from intent
                 //File file = ImagePicker.Companion.getFile(data);
@@ -153,18 +213,6 @@ public class AddItem extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Ne bi trebao dobiti ovu gresku", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private String getBase64String(Uri uri) throws FileNotFoundException, IOException {
-
-        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        // In case you want to compress your image, here it's at 40%
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
 

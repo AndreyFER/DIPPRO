@@ -46,6 +46,35 @@
         app:layout_constraintHorizontal_bias="0.622"
         app:layout_constraintStart_toStartOf="parent"
         app:rippleColor="@color/black"
-        app:srcCompat="@android:drawable/ic_menu_add" />
+        app:srcCompat="@android:drawable/ic_menu_add"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <ImageView
+        android:id="@+id/saveImage"
+        android:layout_width="91dp"
+        android:layout_height="57dp"
+        android:layout_marginTop="672dp"
+        android:background="#00D81010"
+        android:src="@drawable/save_notification"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/saveCounter"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginBottom="24dp"
+        android:paddingTop="5sp"
+        android:text="0"
+        android:textAlignment="center"
+        android:textColor="@color/design_default_color_error"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/saveImage"
+        app:layout_constraintEnd_toEndOf="@+id/saveImage"
+        app:layout_constraintHorizontal_bias="0.803"
+        app:layout_constraintStart_toStartOf="@+id/saveImage" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

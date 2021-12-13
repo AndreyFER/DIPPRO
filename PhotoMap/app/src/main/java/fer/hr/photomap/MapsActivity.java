@@ -1,5 +1,6 @@
 package fer.hr.photomap;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.location.LocationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -13,13 +14,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.metrics.Event;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,9 +41,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.concurrent.ExecutionException;
 
+import fer.hr.photomap.data.model.EventData;
 import fer.hr.photomap.databinding.ActivityMapsBinding;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -47,11 +61,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     View mapView;
+    Context context = this;
     FloatingActionButton customLocationButton;
     FloatingActionButton addItemButton;
     private View defaultlocationButton;
+    TextView saveCounter;
+    ImageView saveImage;
     ArrayList<Float> hueList = new ArrayList<Float>();
-
+    ArrayList<EventData> eventDataList = new ArrayList<>();
+    String username = "guest";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +84,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
 
-        addHuesToList();
-
+        Utils.addHuesToList(hueList);
+        if(!Utils.isNetworkAvailable(context)){
+            Toast.makeText(getApplicationContext(),
+                    "Network connection unavailable.",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -90,18 +112,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        mMap.setInfoWindowAdapter(new MarkerInfoAdapter(this));
+        mMap.setInfoWindowAdapter(new MarkerInfoAdapter(context));
 
         // Add a marker in Sydney and move the camera
         LatLng sydneyLatLng = new LatLng(-34, 151);
         Marker mark1 = mMap.addMarker(new MarkerOptions().position(new LatLng(-33.87365, 151.20689))
-                .title("Marker1")
+                .title("Andrej Gregic;River;Description of a river")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
         Marker mark2 = mMap.addMarker(new MarkerOptions().position(new LatLng(-35.87365, 161.20689))
-                .title("Marker2")
+                .title("Vinko Benkovic;Mountain;Description of a mountain")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydneyLatLng));
+
+        saveImage = (ImageView) findViewById(R.id.saveImage);
+        saveCounter = (TextView) findViewById(R.id.saveCounter);
+        eventDataList = Utils.readFromInternalStorage(context);
+        Log.d("list", eventDataList.toString());
+        if(!eventDataList.isEmpty()){
+            saveCounter.setText(String.valueOf(eventDataList.size()));
+        } else{
+           toogleSaveButton(false, 0);
+        }
+
+        saveImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(Utils.isNetworkAvailable(context) && !eventDataList.isEmpty()){
+                    //upload event data
+                    toogleSaveButton(false,0);
+                    eventDataList.clear();
+                    Utils.saveToInternalStorage(context, new ArrayList<>());
+                    Toast.makeText(context,
+                            "Event data uploaded to server.",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context,
+                            saveCounter.getText().toString() + " events waiting for upload once connection is established.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         defaultlocationButton = mapFragment.getView().findViewById(0x2);
         // Change the visibility of my location button
@@ -119,14 +170,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Intent intentNextActivity = new Intent(getBaseContext(), AddItem.class);
-                LatLng latlng = getCurrentLocation();
-                intentNextActivity.putExtra("latitude", latlng.latitude );
-                intentNextActivity.putExtra("longitude", latlng.longitude );
+                LatLng latlng = Utils.getCurrentLocation(context);
+                double latitude;
+                double longitude;
+                if(latlng != null){
+                    latitude = latlng.latitude;
+                    longitude = latlng.longitude;
+                } else{
+                    latitude = 0;
+                    longitude = 0;
+                }
+                intentNextActivity.putExtra("latitude", latitude );
+                intentNextActivity.putExtra("longitude", longitude );;
                 startActivityForResult(intentNextActivity, 40);
             }
         });
+
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onActivityResult(int requestCode,
                                     int resultCode,
@@ -134,44 +196,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == 40 &&
                 resultCode == RESULT_OK) {
-            String lat = intent.getStringExtra("lat");
-            String lon = intent.getStringExtra("lon");
-            int type = intent.getIntExtra("type", 0) % 9;
-            String imageUriString = intent.getStringExtra("image");
+            Double lat = intent.getDoubleExtra("lat", 0);
+            Double lon = intent.getDoubleExtra("lon", 0);
+            int type = intent.getIntExtra("typeIndex", 0) % 9;
+            String imageString = intent.getStringExtra("image");
             String description = intent.getStringExtra("description");
-            Uri imageUri = Uri.parse(imageUriString);
+            String typeString = intent.getStringExtra("typeString");
+            Uri imageUri = Uri.parse(imageString);
+            EventData eventData = new EventData(description, lat, lon, imageString, type, username);
+            if(Utils.isNetworkAvailable(context)){
+                DatabaseConnection uploadData = null;
+                try {
+                    uploadData = new DatabaseConnection(mMap, eventData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                uploadData.execute();
+            }else{
+                eventDataList.add(eventData);
+                toogleSaveButton(true, eventDataList.size());
+                Utils.saveToInternalStorage(context, eventDataList);
+            }
+            StringJoiner joiner = new StringJoiner(";");
+            joiner.add(username).add(typeString).add(description);
+            String concatenatedData = joiner.toString();
 
-            Marker mark = mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(lat) , Double.parseDouble(lon) ))
-                    .title(description)
-                    .snippet(imageUriString)
+
+            mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lon))
+                    .title(concatenatedData)
+                    .snippet(imageString)
                     .icon(BitmapDescriptorFactory.defaultMarker(hueList.get(type))));
         }
     }
-    private boolean isLocationEnabled(Context context) {
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        return LocationManagerCompat.isLocationEnabled(locationManager);
+
+    private void toogleSaveButton(boolean show, int size) {
+        saveCounter.setText(String.valueOf(eventDataList.size()));
+        saveCounter.setEnabled(show);
+        saveImage.setEnabled(show);
+        if(show){
+            saveCounter.setVisibility(View.VISIBLE);
+            saveImage.setVisibility(View.VISIBLE);
+        } else{
+            saveCounter.setVisibility(View.GONE);
+            saveImage.setVisibility(View.GONE);
+        }
+
     }
 
-    //Getting current location
-    private LatLng getCurrentLocation() {
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        String locationProvider;
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) locationProvider = LocationManager.NETWORK_PROVIDER;
-        else if( locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) locationProvider = LocationManager.GPS_PROVIDER;
-        else return null;
-        @SuppressLint("MissingPermission") android.location.Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-        return new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
-    }
-    private void addHuesToList() {
-        hueList.add(BitmapDescriptorFactory.HUE_AZURE);
-        hueList.add(BitmapDescriptorFactory.HUE_BLUE);
-        hueList.add(BitmapDescriptorFactory.HUE_CYAN);
-        hueList.add(BitmapDescriptorFactory.HUE_GREEN);
-        hueList.add(BitmapDescriptorFactory.HUE_MAGENTA);
-        hueList.add(BitmapDescriptorFactory.HUE_ORANGE);
-        hueList.add(BitmapDescriptorFactory.HUE_RED);
-        hueList.add(BitmapDescriptorFactory.HUE_ROSE);
-        hueList.add(BitmapDescriptorFactory.HUE_VIOLET);
-        hueList.add(BitmapDescriptorFactory.HUE_YELLOW 	);
-    }
 }

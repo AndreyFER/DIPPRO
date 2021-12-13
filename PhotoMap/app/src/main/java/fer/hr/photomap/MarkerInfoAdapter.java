@@ -41,15 +41,19 @@ class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
 
         LatLng latLng = arg0.getPosition();
 
-        TextView tv1 = (TextView) v.findViewById(R.id.textView1);
-        TextView tv2 = (TextView) v.findViewById(R.id.textView2);
-        String title=arg0.getTitle();
+        TextView userView = (TextView) v.findViewById(R.id.user);
+        TextView typeView = (TextView) v.findViewById(R.id.type);
+        TextView description = (TextView) v.findViewById(R.id.description);
+        String unparsedTitle = arg0.getTitle();
         String snippetData=arg0.getSnippet();
 
-        tv1.setText(title);
-        tv2.setText("filler");
+        String[] titleParts = unparsedTitle.split(";");
+
+        userView.setText(titleParts[0]);
+        typeView.setText(titleParts[1]);
+        description.setText(titleParts[2]);
         if(snippetData != null) {
-            ImageView im = (ImageView) v.findViewById(R.id.imageView1);
+            ImageView im = (ImageView) v.findViewById(R.id.markerImage);
             // Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.grom);
             Bitmap image = decodeBase64(snippetData);
             im.setImageBitmap(image);
