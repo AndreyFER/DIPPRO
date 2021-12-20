@@ -1,8 +1,10 @@
-package fer.hr.photomap;
+package fer.hr.photomap.data;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -19,20 +21,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import fer.hr.photomap.data.model.EventData;
 
-public class DatabaseConnection extends AsyncTask<String, String, String> {
-    GoogleMap mMap;
-    URL databaseEndpoint = new URL("https://api.github.com/");
+public class FetchTypes extends AsyncTask<String, String, String> {
+    Spinner spinner;
+    URL databaseEndpoint = new URL("https://diplomski-projekt.herokuapp.com/api/tipObjave");
 
     // Create connection
     HttpsURLConnection myConnection = (HttpsURLConnection) databaseEndpoint.openConnection();
 
-    public DatabaseConnection(GoogleMap mMap, EventData eventData) throws IOException {
-        this.mMap = mMap;
+    public FetchTypes(Spinner spinner) throws IOException {
+        this.spinner = spinner;
     }
 
 
@@ -46,7 +50,6 @@ public class DatabaseConnection extends AsyncTask<String, String, String> {
             String result = "";
             try {
                 URL url;
-                HttpURLConnection urlConnection = null;
                 try {
                     if (myConnection.getResponseCode() == 200) {
 
@@ -68,8 +71,8 @@ public class DatabaseConnection extends AsyncTask<String, String, String> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
+                    if (myConnection != null) {
+                        myConnection.disconnect();
                     }
                 }
 
@@ -85,15 +88,20 @@ public class DatabaseConnection extends AsyncTask<String, String, String> {
         protected void onPostExecute(String s) {
             try {
 
-                JSONObject jsonObject = new JSONObject(s);
+                JSONArray typesArray = new JSONArray(s);
+                List<String> typesList = new ArrayList<>();
 
+                for(int i = 0; i<typesArray.length(); i++){
+                    JSONObject typeObject = typesArray.getJSONObject(i);
+                    String type = typeObject.getString("naziv");
+                    typesList.add(type);
+                }
 
-                String currentUser =jsonObject.getString("current_user_authorizations_html_url");
-                Log.d("result2", currentUser);
-                LatLng sydneyLatLng = new LatLng(-36, 147);
-                Marker mark = mMap.addMarker(new MarkerOptions().position(sydneyLatLng )
-                        .title(currentUser)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                Log.d("typesList", typesList.toString());
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(spinner.getContext(), android.R.layout.simple_spinner_dropdown_item, typesList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(adapter);
 
             } catch (JSONException e) {
                 e.printStackTrace();

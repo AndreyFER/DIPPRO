@@ -7,29 +7,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import fer.hr.photomap.data.model.EventData;
+import fer.hr.photomap.data.FetchTypes;
 
 public class AddItem extends AppCompatActivity {
     Context context = this;
@@ -130,10 +121,11 @@ public class AddItem extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
+                if(latitude == 0) latitude = Double.parseDouble(latitudeText.getText().toString());
+                if(longitude == 0) longitude = Double.parseDouble(longitudeText.getText().toString());
                 intent.putExtra("lat", latitude);
                 intent.putExtra("lon", longitude);
-                intent.putExtra("typeIndex", spinner.getSelectedItemPosition());
-                intent.putExtra("typeString", spinner.getSelectedItem().toString());
+                intent.putExtra("type", spinner.getSelectedItem().toString());
                 intent.putExtra("description", descriptionText.getText().toString());
                 try {
                     intent.putExtra("image", Utils.getBase64String(imageUri, context));
@@ -154,7 +146,7 @@ public class AddItem extends AppCompatActivity {
                 ImagePicker.Companion.with(AddItem.this)
                         .provider(ImageProvider.CAMERA)
                         .compress(1048)//maksimalna velicina slike u KB
-                        .maxResultSize(576,576)
+                        .maxResultSize(650,650)
                         .start();
             }
         });
@@ -168,7 +160,7 @@ public class AddItem extends AppCompatActivity {
                 ImagePicker.Companion.with(AddItem.this)
                         .provider(ImageProvider.GALLERY)
                         .compress(1048)//maksimalna velicina slike u KB
-                        .maxResultSize(356,356)
+                        .maxResultSize(650,650)
                         .start();
             }
         });
@@ -180,7 +172,14 @@ public class AddItem extends AppCompatActivity {
                 R.array.types_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-
+        if(Utils.isNetworkAvailable(context)) {
+            try {
+                FetchTypes fetchTypes = new FetchTypes(spinner);
+                fetchTypes.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 

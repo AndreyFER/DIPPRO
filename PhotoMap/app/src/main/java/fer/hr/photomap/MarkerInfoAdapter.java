@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -56,7 +57,7 @@ class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
             ImageView im = (ImageView) v.findViewById(R.id.markerImage);
             // Bitmap bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.grom);
             Bitmap image = decodeBase64(snippetData);
-            im.setImageBitmap(image);
+            if(image != null) im.setImageBitmap(image);
         }
         //im.setImageURI(Uri.parse(snippetData));
 
@@ -65,11 +66,15 @@ class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
     }
 
     private Bitmap decodeBase64(String completeImageData) {
+        try {
+            InputStream stream = new ByteArrayInputStream(Base64.decode(completeImageData.getBytes(), Base64.DEFAULT));
 
-        InputStream stream = new ByteArrayInputStream(Base64.decode(completeImageData.getBytes(), Base64.DEFAULT));
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            return bitmap;
+        } catch(IllegalArgumentException ex){
+            Log.e("ImageDecode", "Image decoding failed");
+            return null;
+        }
 
-        Bitmap bitmap = BitmapFactory.decodeStream(stream);
-
-        return bitmap;
     }
 }

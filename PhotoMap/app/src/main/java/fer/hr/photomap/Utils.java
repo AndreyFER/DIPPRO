@@ -7,14 +7,18 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.location.LocationManagerCompat;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -24,10 +28,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.StringJoiner;
 
 import fer.hr.photomap.data.model.EventData;
 
 public class Utils {
+    static final ArrayList<Float> hueList = new ArrayList<>(Arrays.asList(BitmapDescriptorFactory.HUE_AZURE, BitmapDescriptorFactory.HUE_BLUE,
+            BitmapDescriptorFactory.HUE_CYAN, BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_MAGENTA
+            ,BitmapDescriptorFactory.HUE_ORANGE,BitmapDescriptorFactory.HUE_RED,BitmapDescriptorFactory.HUE_ROSE,
+            BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_VIOLET));
 
     public static boolean isLocationEnabled(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -46,18 +56,6 @@ public class Utils {
         else return null;
 
     }
-    public static void addHuesToList(ArrayList<Float> hueList) {
-        hueList.add(BitmapDescriptorFactory.HUE_AZURE);
-        hueList.add(BitmapDescriptorFactory.HUE_BLUE);
-        hueList.add(BitmapDescriptorFactory.HUE_CYAN);
-        hueList.add(BitmapDescriptorFactory.HUE_GREEN);
-        hueList.add(BitmapDescriptorFactory.HUE_MAGENTA);
-        hueList.add(BitmapDescriptorFactory.HUE_ORANGE);
-        hueList.add(BitmapDescriptorFactory.HUE_RED);
-        hueList.add(BitmapDescriptorFactory.HUE_ROSE);
-        hueList.add(BitmapDescriptorFactory.HUE_VIOLET);
-        hueList.add(BitmapDescriptorFactory.HUE_YELLOW 	);
-    }
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager
@@ -73,10 +71,10 @@ public class Utils {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         // In case you want to compress your image, here it's at 40%
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP);
     }
 
     public static void saveToInternalStorage(Context context, ArrayList<EventData> eventList) {
@@ -108,5 +106,18 @@ public class Utils {
             e.printStackTrace();
         }
         return toReturn;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static void addMarkerToMap(GoogleMap mMap, EventData eventData) {
+        StringJoiner joiner = new StringJoiner(";");
+        joiner.add(eventData.getUser()).add(eventData.getType()).add(eventData.getDescription());
+        String concatenatedData = joiner.toString();
+
+        int typeIndex = eventData.getType().hashCode() % hueList.size();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(eventData.getLatitude(),eventData.getLongitude()))
+                .title(concatenatedData)
+                .snippet(eventData.getImage())
+                .icon(BitmapDescriptorFactory.defaultMarker(hueList.get(typeIndex))));
     }
 }

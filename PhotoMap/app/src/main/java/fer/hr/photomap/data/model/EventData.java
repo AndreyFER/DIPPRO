@@ -8,11 +8,11 @@ public class EventData implements Serializable {
     private double latitude;
     private double longitude;
     private String image;
-    private int type;
+    private String type;
     private String user;
 
 
-    public EventData(String description, double latitude, double longitude, String image, int type, String user) {
+    public EventData(String description, double latitude, double longitude, String image, String type, String user) {
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -84,11 +84,11 @@ public class EventData implements Serializable {
         this.image = image;
     }
 
-    public int getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(String type) {
         this.type = type;
     }
 }

@@ -2,7 +2,6 @@ package fer.hr.photomap;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
-import androidx.core.location.LocationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
@@ -10,25 +9,16 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.location.LocationManager;
 import android.media.metrics.Event;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 
@@ -40,16 +30,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.StringJoiner;
-import java.util.concurrent.ExecutionException;
 
+import fer.hr.photomap.data.FetchEvents;
+import fer.hr.photomap.data.UploadEvent;
 import fer.hr.photomap.data.model.EventData;
 import fer.hr.photomap.databinding.ActivityMapsBinding;
 
@@ -67,9 +53,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private View defaultlocationButton;
     TextView saveCounter;
     ImageView saveImage;
-    ArrayList<Float> hueList = new ArrayList<Float>();
     ArrayList<EventData> eventDataList = new ArrayList<>();
-    String username = "guest";
+    String username = "ivan.baljkas";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +69,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
 
-        Utils.addHuesToList(hueList);
         if(!Utils.isNetworkAvailable(context)){
             Toast.makeText(getApplicationContext(),
                     "Network connection unavailable.",
@@ -101,6 +85,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceType")
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -130,16 +115,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         eventDataList = Utils.readFromInternalStorage(context);
         Log.d("list", eventDataList.toString());
         if(!eventDataList.isEmpty()){
+            for(EventData eventData : eventDataList){
+                Utils.addMarkerToMap(mMap, eventData);
+            }
             saveCounter.setText(String.valueOf(eventDataList.size()));
         } else{
            toogleSaveButton(false, 0);
         }
 
         saveImage.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 if(Utils.isNetworkAvailable(context) && !eventDataList.isEmpty()){
-                    //upload event data
+                    for(EventData eventData : eventDataList){
+                        try {
+                            UploadEvent uploadEvent = new UploadEvent(eventData);
+                            uploadEvent.execute();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     toogleSaveButton(false,0);
                     eventDataList.clear();
                     Utils.saveToInternalStorage(context, new ArrayList<>());
@@ -186,6 +182,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        if(Utils.isNetworkAvailable(context)) {
+            try {
+                FetchEvents fetchEvents = new FetchEvents(mMap);
+                fetchEvents.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -198,16 +203,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 resultCode == RESULT_OK) {
             Double lat = intent.getDoubleExtra("lat", 0);
             Double lon = intent.getDoubleExtra("lon", 0);
-            int type = intent.getIntExtra("typeIndex", 0) % 9;
             String imageString = intent.getStringExtra("image");
             String description = intent.getStringExtra("description");
-            String typeString = intent.getStringExtra("typeString");
+            String typeString = intent.getStringExtra("type");
             Uri imageUri = Uri.parse(imageString);
-            EventData eventData = new EventData(description, lat, lon, imageString, type, username);
+            EventData eventData = new EventData(description, lat, lon, imageString, typeString, username);
             if(Utils.isNetworkAvailable(context)){
-                DatabaseConnection uploadData = null;
+                UploadEvent uploadData = null;
                 try {
-                    uploadData = new DatabaseConnection(mMap, eventData);
+                    uploadData = new UploadEvent(eventData);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -217,15 +221,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 toogleSaveButton(true, eventDataList.size());
                 Utils.saveToInternalStorage(context, eventDataList);
             }
-            StringJoiner joiner = new StringJoiner(";");
-            joiner.add(username).add(typeString).add(description);
-            String concatenatedData = joiner.toString();
-
-
-            mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lon))
-                    .title(concatenatedData)
-                    .snippet(imageString)
-                    .icon(BitmapDescriptorFactory.defaultMarker(hueList.get(type))));
+            Utils.addMarkerToMap(mMap, eventData);
         }
     }
 
