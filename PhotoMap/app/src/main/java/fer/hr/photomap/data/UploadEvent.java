@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -48,7 +50,9 @@ public class UploadEvent extends AsyncTask<String, String, String> {
             try {
                 JSONObject postData = new JSONObject();
                 postData.put("opis", eventData.getDescription());
-                postData.put("datum", "2021-12-20");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String date = simpleDateFormat.format(new Date());
+                postData.put("datum", date);
                 postData.put("geografskaSirina", eventData.getLatitude());
                 postData.put("geografskaDuzina", eventData.getLongitude());
                 postData.put("korisnik", eventData.getUser());

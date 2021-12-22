@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PhotoMap</string>
+    <string name="app_name">EventMap</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="title_activity_marker_info_adapter">MarkerInfoAdapter</string>
     <!-- Strings used for fragments for navigation -->

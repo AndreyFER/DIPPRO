@@ -37,8 +37,6 @@ public class FetchEvents extends AsyncTask<String, String, String> {
     GoogleMap mMap;
     URL databaseEndpoint = new URL("https://diplomski-projekt.herokuapp.com/api/objave");
 
-    // Create connection
-
     public FetchEvents(GoogleMap mMap) throws IOException {
         this.mMap = mMap;
     }
