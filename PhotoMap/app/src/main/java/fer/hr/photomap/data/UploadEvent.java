@@ -30,7 +30,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import fer.hr.photomap.data.model.EventData;
 
-public class UploadEvent extends AsyncTask<String, String, String> {
+public class UploadEvent extends AsyncTask<String, String, Boolean> {
     EventData eventData;
 
 
@@ -45,8 +45,7 @@ public class UploadEvent extends AsyncTask<String, String, String> {
         }
 
         @Override
-        protected String doInBackground(String... params) {
-            String result = "";
+        protected Boolean doInBackground(String... params) {
             try {
                 JSONObject postData = new JSONObject();
                 postData.put("opis", eventData.getDescription());
@@ -88,6 +87,7 @@ public class UploadEvent extends AsyncTask<String, String, String> {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    return Boolean.FALSE;
                 } finally {
                     if (myConnection != null) {
                         myConnection.disconnect();
@@ -96,14 +96,14 @@ public class UploadEvent extends AsyncTask<String, String, String> {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                return "Exception: " + e.getMessage();
+                return Boolean.FALSE;
             }
-            return result;
+            return Boolean.TRUE;
 
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(Boolean s) {
         }
 
     }

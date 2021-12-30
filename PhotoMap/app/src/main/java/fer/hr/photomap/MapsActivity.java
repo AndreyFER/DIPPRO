@@ -31,8 +31,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.StringJoiner;
+import java.util.concurrent.ExecutionException;
 
 import fer.hr.photomap.data.FetchEvents;
 import fer.hr.photomap.data.UploadEvent;
@@ -52,7 +54,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FloatingActionButton addItemButton;
     private View defaultlocationButton;
     TextView saveCounter;
-    ImageView saveImage;
+    ImageView saveButton;
     ArrayList<EventData> eventDataList = new ArrayList<>();
     String username = "ivan.baljkas";
 
@@ -110,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydneyLatLng));
 
-        saveImage = (ImageView) findViewById(R.id.saveImage);
+        saveButton = (ImageView) findViewById(R.id.saveImage);
         saveCounter = (TextView) findViewById(R.id.saveCounter);
         eventDataList = Utils.readFromInternalStorage(context);
         Log.d("list", eventDataList.toString());
@@ -123,22 +125,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
            toogleSaveButton(false, 0);
         }
 
-        saveImage.setOnClickListener(new View.OnClickListener() {
+        saveButton.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 if(Utils.isNetworkAvailable(context) && !eventDataList.isEmpty()){
+                    ArrayList<EventData> newEventDataList = new ArrayList<>(eventDataList);
                     for(EventData eventData : eventDataList){
                         try {
                             UploadEvent uploadEvent = new UploadEvent(eventData);
-                            uploadEvent.execute();
-                        } catch (IOException e) {
+                            for(int i = 0; i<3; i++){
+                                Boolean success = uploadEvent.execute().get();
+                                if(success) {
+                                    newEventDataList.remove(eventData); //remove successfully uploaded event (cannot remove from list being iterated)
+                                }
+                            }
+
+                        } catch (IOException | ExecutionException | InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
-                    toogleSaveButton(false,0);
-                    eventDataList.clear();
-                    Utils.saveToInternalStorage(context, new ArrayList<>());
+                    eventDataList = newEventDataList;
+                    if(eventDataList.isEmpty()) toogleSaveButton(false,0);
+                    else toogleSaveButton(true, eventDataList.size());
+                    Utils.saveToInternalStorage(context, eventDataList);
                     Toast.makeText(context,
                             "Event data uploaded to server.",
                             Toast.LENGTH_LONG).show();
@@ -182,14 +192,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        if(Utils.isNetworkAvailable(context)) {
-            try {
-                FetchEvents fetchEvents = new FetchEvents(mMap);
+        try {
+                FetchEvents fetchEvents = new FetchEvents(mMap, context);
                 fetchEvents.execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
 
     }
 
@@ -228,13 +236,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void toogleSaveButton(boolean show, int size) {
         saveCounter.setText(String.valueOf(eventDataList.size()));
         saveCounter.setEnabled(show);
-        saveImage.setEnabled(show);
+        saveButton.setEnabled(show);
         if(show){
             saveCounter.setVisibility(View.VISIBLE);
-            saveImage.setVisibility(View.VISIBLE);
+            saveButton.setVisibility(View.VISIBLE);
         } else{
             saveCounter.setVisibility(View.GONE);
-            saveImage.setVisibility(View.GONE);
+            saveButton.setVisibility(View.GONE);
         }
 
     }
