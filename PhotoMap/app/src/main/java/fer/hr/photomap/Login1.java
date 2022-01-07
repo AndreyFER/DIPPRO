@@ -42,7 +42,7 @@ public class Login1 extends AppCompatActivity{
                     public void processFinish(Integer output) {
                         if(output != 0) {
                             Toast.makeText(Login1.this, "Prijavljen korisnik " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(v.getContext(), MapsActivity.class);
+                            Intent intent = new Intent(getBaseContext(), MapsActivity.class);
                             intent.putExtra("username", usernameL.getText().toString());
                             startActivity(intent);
                         }else{

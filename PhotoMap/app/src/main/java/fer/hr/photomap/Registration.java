@@ -3,6 +3,7 @@ package fer.hr.photomap;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -23,6 +24,12 @@ public class Registration extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String usernameReturn = new String();
+        if(checkSignInUser(usernameReturn)) {
+            Intent intent = new Intent(this, MapsActivity.class);
+            intent.putExtra("username", usernameReturn);
+            startActivity(intent);
+        }
         setContentView(R.layout.activity_registration);
         getSupportActionBar().hide();
 
@@ -42,8 +49,11 @@ public class Registration extends AppCompatActivity{
                         public void processFinish(Integer output) {
                             if(output != 0) {
                                 Toast.makeText(Registration.this, "Registriran i prijavljen korisnik " + usernameR.getText().toString(), Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(v.getContext(), MapsActivity.class);
+                                Intent intent = new Intent(getBaseContext(), MapsActivity.class);
                                 intent.putExtra("username", usernameR.getText().toString());
+                                SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
+                                editor.putString("username", usernameR.getText().toString());
+                                editor.apply();
                                 startActivity(intent);
                             }else{
                                 Toast.makeText(Registration.this, "Nije uspjela registracija i prijava", Toast.LENGTH_LONG).show();
@@ -64,5 +74,15 @@ public class Registration extends AppCompatActivity{
                 startActivity(intent);
             }
         });
+    }
+
+    public Boolean checkSignInUser(String usernameReturn) {
+        SharedPreferences prefs = getSharedPreferences("PrefFile", MODE_PRIVATE);
+        String username = prefs.getString("username", "No username defined");
+        if (!username.equals("No username defined")){
+            usernameReturn = username;
+            return true;
+        }
+        return false;
     }
 }

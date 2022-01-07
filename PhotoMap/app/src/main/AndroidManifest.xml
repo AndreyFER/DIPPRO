@@ -62,8 +62,14 @@
 
         <activity
             android:name=".MapsActivity"
-            android:exported="false"
-            android:label="EventMap"/>
+            android:exported="true"
+            android:label="EventMap">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
