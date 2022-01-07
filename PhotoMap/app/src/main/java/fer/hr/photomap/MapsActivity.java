@@ -56,7 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView saveCounter;
     ImageView saveButton;
     ArrayList<EventData> eventDataList = new ArrayList<>();
-    String username = "ivan.baljkas";
+    //String username = "ivan.baljkas";
+    String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        username = getIntent().getStringExtra("username");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -76,6 +79,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     "Network connection unavailable.",
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        ;
     }
 
     /**

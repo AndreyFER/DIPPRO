@@ -23,6 +23,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PhotoMap">
         <activity
+            android:name=".Login1"
+            android:exported="false" />
+        <activity
+            android:name=".Registration"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ui.login.LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_login" />
@@ -35,7 +47,7 @@
         <activity
             android:name=".AddItem"
             android:exported="false"
-            android:label="Add Event"/>
+            android:label="Add Event" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -50,13 +62,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:exported="true"
-            android:label="EventMap">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false"
+            android:label="EventMap"/>
     </application>
 
 </manifest>
