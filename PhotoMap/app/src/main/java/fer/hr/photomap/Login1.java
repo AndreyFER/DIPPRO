@@ -3,6 +3,7 @@ package fer.hr.photomap;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -44,7 +45,11 @@ public class Login1 extends AppCompatActivity{
                             Toast.makeText(Login1.this, "Prijavljen korisnik " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(getBaseContext(), MapsActivity.class);
                             intent.putExtra("username", usernameL.getText().toString());
+                            SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
+                            editor.putString("username", usernameL.getText().toString());
+                            editor.apply();
                             startActivity(intent);
+                            finish();
                         }else{
                             Toast.makeText(Login1.this, "Nije uspjela prijava", Toast.LENGTH_LONG).show();
                         }
@@ -56,7 +61,7 @@ public class Login1 extends AppCompatActivity{
         signupbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), Registration.class);
+                Intent intent = new Intent(getBaseContext(), Registration.class);
                 startActivity(intent);
             }
         });

@@ -23,16 +23,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PhotoMap">
         <activity
-            android:name=".Login1"
-            android:exported="false" />
-        <activity
-            android:name=".Registration"
-            android:exported="true">
+            android:name=".splashScreen"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".Login1"
+            android:exported="false" />
+        <activity
+            android:name=".Registration"
+            android:exported="true">
+
         </activity>
         <activity
             android:name=".ui.login.LoginActivity"

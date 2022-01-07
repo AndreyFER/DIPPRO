@@ -24,12 +24,7 @@ public class Registration extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String usernameReturn = new String();
-        if(checkSignInUser(usernameReturn)) {
-            Intent intent = new Intent(this, MapsActivity.class);
-            intent.putExtra("username", usernameReturn);
-            startActivity(intent);
-        }
+
         setContentView(R.layout.activity_registration);
         getSupportActionBar().hide();
 
@@ -55,6 +50,7 @@ public class Registration extends AppCompatActivity{
                                 editor.putString("username", usernameR.getText().toString());
                                 editor.apply();
                                 startActivity(intent);
+                                finish();
                             }else{
                                 Toast.makeText(Registration.this, "Nije uspjela registracija i prijava", Toast.LENGTH_LONG).show();
                             }
@@ -70,19 +66,10 @@ public class Registration extends AppCompatActivity{
         signinbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), Login1.class);
+                Intent intent = new Intent(getBaseContext(), Login1.class);
                 startActivity(intent);
             }
         });
     }
 
-    public Boolean checkSignInUser(String usernameReturn) {
-        SharedPreferences prefs = getSharedPreferences("PrefFile", MODE_PRIVATE);
-        String username = prefs.getString("username", "No username defined");
-        if (!username.equals("No username defined")){
-            usernameReturn = username;
-            return true;
-        }
-        return false;
-    }
 }
