@@ -45,7 +45,6 @@ public class Registration extends AppCompatActivity{
                             if(output != 0) {
                                 Toast.makeText(Registration.this, "Registriran i prijavljen korisnik " + usernameR.getText().toString(), Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(getBaseContext(), MapsActivity.class);
-                                intent.putExtra("username", usernameR.getText().toString());
                                 SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                                 editor.putString("username", usernameR.getText().toString());
                                 editor.apply();

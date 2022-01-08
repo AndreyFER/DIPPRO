@@ -8,6 +8,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.metrics.Event;
 import android.net.Uri;
@@ -55,6 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private View defaultlocationButton;
     TextView saveCounter;
     ImageView saveButton;
+    TextView userInfo;
+    TextView signOutBtn;
     ArrayList<EventData> eventDataList = new ArrayList<>();
     //String username = "ivan.baljkas";
     String username;
@@ -66,7 +69,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        username = getIntent().getStringExtra("username");
+        SharedPreferences prefs = getSharedPreferences("PrefFile", MODE_PRIVATE);
+        username = prefs.getString("username", "No username defined");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -79,6 +83,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     "Network connection unavailable.",
                     Toast.LENGTH_LONG).show();
         }
+
+        userInfo = (TextView) findViewById(R.id.usernameM);
+        signOutBtn = (TextView) findViewById(R.id.signoutbtn);
+
+        userInfo.setText(username);
+
+        signOutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getBaseContext(), Login1.class);
+                SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
+                editor.putString("username", "No username defined");
+                editor.apply();
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     //@Override
@@ -123,6 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         saveButton = (ImageView) findViewById(R.id.saveImage);
         saveCounter = (TextView) findViewById(R.id.saveCounter);
         eventDataList = Utils.readFromInternalStorage(context);
+
         Log.d("list", eventDataList.toString());
         if(!eventDataList.isEmpty()){
             for(EventData eventData : eventDataList){

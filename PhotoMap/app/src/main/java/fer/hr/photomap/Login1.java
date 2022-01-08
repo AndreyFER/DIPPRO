@@ -44,7 +44,6 @@ public class Login1 extends AppCompatActivity{
                         if(output != 0) {
                             Toast.makeText(Login1.this, "Prijavljen korisnik " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(getBaseContext(), MapsActivity.class);
-                            intent.putExtra("username", usernameL.getText().toString());
                             SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                             editor.putString("username", usernameL.getText().toString());
                             editor.apply();
