@@ -133,17 +133,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.setInfoWindowAdapter(new MarkerInfoAdapter(context));
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydneyLatLng = new LatLng(-34, 151);
-        Marker mark1 = mMap.addMarker(new MarkerOptions().position(new LatLng(-33.87365, 151.20689))
-                .title("Andrej Gregic;River;Description of a river")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-
-        Marker mark2 = mMap.addMarker(new MarkerOptions().position(new LatLng(-35.87365, 161.20689))
-                .title("Vinko Benkovic;Mountain;Description of a mountain")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydneyLatLng));
-
         saveButton = (ImageView) findViewById(R.id.saveImage);
         saveCounter = (TextView) findViewById(R.id.saveCounter);
         eventDataList = Utils.readFromInternalStorage(context);
@@ -305,7 +294,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Boolean success = uploadEvent.execute().get();
                     if(success) {
                         newEventDataList.remove(eventData); //remove successfully uploaded event (cannot remove from list being iterated)
-                        Log.d("provjera debug", "evo mee");
                         break;
                     }
                 }

@@ -9,8 +9,8 @@
 
     <EditText
         android:id="@+id/latitudeText"
-        android:layout_width="155dp"
-        android:layout_height="37dp"
+        android:layout_width="157dp"
+        android:layout_height="38dp"
         android:layout_marginStart="27dp"
         android:layout_marginEnd="53dp"
         android:layout_marginBottom="10dp"
@@ -24,8 +24,8 @@
 
     <EditText
         android:id="@+id/longitudeText"
-        android:layout_width="157dp"
-        android:layout_height="39dp"
+        android:layout_width="159dp"
+        android:layout_height="43dp"
         android:layout_marginEnd="16dp"
         android:hint="Longitude"
         android:inputType="numberDecimal|numberSigned"

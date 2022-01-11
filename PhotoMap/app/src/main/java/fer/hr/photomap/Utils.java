@@ -115,9 +115,11 @@ public class Utils {
         String concatenatedData = joiner.toString();
 
         int typeIndex = eventData.getType().hashCode() % hueList.size();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(eventData.getLatitude(),eventData.getLongitude()))
+        mMap.clear();
+        MarkerOptions markerOpt = new MarkerOptions().position(new LatLng(eventData.getLatitude(),eventData.getLongitude()))
                 .title(concatenatedData)
                 .snippet(eventData.getImage())
-                .icon(BitmapDescriptorFactory.defaultMarker(hueList.get(typeIndex))));
+                .icon(BitmapDescriptorFactory.defaultMarker(hueList.get(typeIndex)));
+        mMap.addMarker(markerOpt);
     }
 }

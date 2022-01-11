@@ -19,7 +19,7 @@ import fer.hr.photomap.data.SignInUser;
 import fer.hr.photomap.data.SignUpUser;
 import fer.hr.photomap.data.model.User;
 
-public class Login1 extends AppCompatActivity{
+public class Login1 extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +27,8 @@ public class Login1 extends AppCompatActivity{
         setContentView(R.layout.activity_login1);
         getSupportActionBar().hide();
 
-        TextView usernameL =(TextView) findViewById(R.id.usernameL);
-        TextView passwordL =(TextView) findViewById(R.id.passwordL);
+        TextView usernameL = (TextView) findViewById(R.id.usernameL);
+        TextView passwordL = (TextView) findViewById(R.id.passwordL);
         TextView signupbtn = (TextView) findViewById(R.id.signupbtn);
         MaterialButton loginbtn = (MaterialButton) findViewById(R.id.loginbtn);
 
@@ -38,25 +38,25 @@ public class Login1 extends AppCompatActivity{
                 User user = new User(usernameL.getText().toString(), passwordL.getText().toString());
                 SignInUser signinUser = null;
 
-                signinUser= (SignInUser) new SignInUser(user, new AsyncResponse() {
+                signinUser = (SignInUser) new SignInUser(user, new AsyncResponse() {
                     @Override
                     public void processFinish(Integer output) {
-                        if(output != 0) {
-                            int returnFromMapsAc = getIntent().getIntExtra("AnonLogin", 35);
-                            Toast.makeText(Login1.this, "Prijavljen korisnik " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
+                        if (output != 0) {
+                            int returnFromMapsAc = getIntent().getIntExtra("AnonLogin", 0);
+                            Toast.makeText(Login1.this, "Logged in as user " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
                             SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                             editor.putString("username", usernameL.getText().toString());
                             editor.apply();
-                            if(returnFromMapsAc != 30) {
+                            if (returnFromMapsAc != 30) {
                                 Intent intent = new Intent(getBaseContext(), MapsActivity.class);
                                 startActivity(intent);
-                            }else {
+                            } else {
                                 Intent intent = new Intent();
                                 setResult(RESULT_OK, intent);
                             }
                             finish();
-                        }else{
-                            Toast.makeText(Login1.this, "Nije uspjela prijava", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(Login1.this, "Login failed", Toast.LENGTH_LONG).show();
                         }
                     }
                 }).execute();
@@ -66,10 +66,28 @@ public class Login1 extends AppCompatActivity{
         signupbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int returnFromMapsAc = getIntent().getIntExtra("AnonLogin", 0);
                 Intent intent = new Intent(getBaseContext(), Registration.class);
-                startActivity(intent);
+                if (returnFromMapsAc != 30) {
+                    startActivity(intent);
+                    finish();
+                } else { //call Registration for AnonRegistration
+                    intent.putExtra("AnonRegistration", 35);
+                    startActivityForResult(intent, 35);
+                }
             }
         });
-    }
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == 35 &&
+                resultCode == RESULT_OK) {
+            Intent returnIntent = new Intent();
+            setResult(RESULT_OK, returnIntent);
+            finish();
+        }
+    }
+}

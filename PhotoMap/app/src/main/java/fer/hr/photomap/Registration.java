@@ -43,15 +43,21 @@ public class Registration extends AppCompatActivity{
                         @Override
                         public void processFinish(Integer output) {
                             if(output != 0) {
-                                Toast.makeText(Registration.this, "Registriran i prijavljen korisnik " + usernameR.getText().toString(), Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+                                int returnFromMapsAc = getIntent().getIntExtra("AnonRegistration", 0);
+                                Toast.makeText(Registration.this, "Successful registration with username " + usernameR.getText().toString(), Toast.LENGTH_LONG).show();
                                 SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                                 editor.putString("username", usernameR.getText().toString());
                                 editor.apply();
-                                startActivity(intent);
+                                if (returnFromMapsAc != 35) {
+                                    Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+                                    startActivity(intent);
+                                } else {
+                                    Intent intent = new Intent();
+                                    setResult(RESULT_OK, intent);
+                                }
                                 finish();
                             }else{
-                                Toast.makeText(Registration.this, "Nije uspjela registracija i prijava", Toast.LENGTH_LONG).show();
+                                Toast.makeText(Registration.this, "Registration failed", Toast.LENGTH_LONG).show();
                             }
                         }
                     }).execute();
