@@ -71,6 +71,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         SharedPreferences prefs = getSharedPreferences("PrefFile", MODE_PRIVATE);
         username = prefs.getString("username", "No username defined");
+        if (username.equals("No username defined")){
+            username = "Anonymous user";
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -160,28 +163,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if(Utils.isNetworkAvailable(context) && !eventDataList.isEmpty()){
-                    ArrayList<EventData> newEventDataList = new ArrayList<>(eventDataList);
-                    for(EventData eventData : eventDataList){
-                        try {
-                            UploadEvent uploadEvent = new UploadEvent(eventData);
-                            for(int i = 0; i<3; i++){
-                                Boolean success = uploadEvent.execute().get();
-                                if(success) {
-                                    newEventDataList.remove(eventData); //remove successfully uploaded event (cannot remove from list being iterated)
-                                }
-                            }
 
-                        } catch (IOException | ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                    ////ispod je dodatak u slucaju anonymousa da ga salje na login kad uhvati internet
+                    if (username.equals("Anonymous user")) {
+                        Intent intent = new Intent(getBaseContext(), Login1.class);
+                        SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
+                        editor.putString("username", "No username defined");
+                        editor.apply();
+                        intent.putExtra("AnonLogin", 30);
+                        startActivityForResult(intent, 30);
+                    }else {
+                        uploadEventsList();
                     }
-                    eventDataList = newEventDataList;
-                    if(eventDataList.isEmpty()) toogleSaveButton(false,0);
-                    else toogleSaveButton(true, eventDataList.size());
-                    Utils.saveToInternalStorage(context, eventDataList);
-                    Toast.makeText(context,
-                            "Event data uploaded to server.",
-                            Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(context,
                             saveCounter.getText().toString() + " events waiting for upload once connection is established.",
@@ -244,7 +237,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String imageString = intent.getStringExtra("image");
             String description = intent.getStringExtra("description");
             String typeString = intent.getStringExtra("type");
-            Uri imageUri = Uri.parse(imageString);
+            try {
+                Uri imageUri = Uri.parse(imageString);
+            }catch (RuntimeException e){
+                imageString = "nekaslikaaa";
+                Uri imageUri = Uri.parse(imageString);
+            }
             EventData eventData = new EventData(description, lat, lon, imageString, typeString, username);
             if(Utils.isNetworkAvailable(context)){
                 UploadEvent uploadData = null;
@@ -261,6 +259,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             Utils.addMarkerToMap(mMap, eventData);
         }
+        if (requestCode == 30 &&
+                resultCode == RESULT_OK) {
+            SharedPreferences prefs = getSharedPreferences("PrefFile", MODE_PRIVATE);
+            username = prefs.getString("username", "No username defined");
+            userInfo.setText(username);
+            if(eventsGotUserAnonymous(eventDataList)) {
+                for(EventData eData : eventDataList) {
+                    eData.setUser(username);
+                }
+            }
+            uploadEventsList();
+        }
     }
 
     private void toogleSaveButton(boolean show, int size) {
@@ -275,6 +285,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             saveButton.setVisibility(View.GONE);
         }
 
+    }
+
+    private boolean eventsGotUserAnonymous(ArrayList<EventData> eventDataList) {
+        for(EventData event : eventDataList){
+            if(event.getUser().equals("Anonymous user")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void uploadEventsList() {
+        ArrayList<EventData> newEventDataList = new ArrayList<>(eventDataList);
+        for(EventData eventData : eventDataList){
+            try {
+                for(int i = 0; i<3; i++){
+                    UploadEvent uploadEvent = new UploadEvent(eventData);
+                    Boolean success = uploadEvent.execute().get();
+                    if(success) {
+                        newEventDataList.remove(eventData); //remove successfully uploaded event (cannot remove from list being iterated)
+                        Log.d("provjera debug", "evo mee");
+                        break;
+                    }
+                }
+
+            } catch (IOException | ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        eventDataList = newEventDataList;
+        if(eventDataList.isEmpty()) toogleSaveButton(false,0);
+        else toogleSaveButton(true, eventDataList.size());
+        Utils.saveToInternalStorage(context, eventDataList);
+        Toast.makeText(context,
+                "Event data uploaded to server.",
+                Toast.LENGTH_LONG).show();
     }
 
 }

@@ -2,6 +2,7 @@ package fer.hr.photomap;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ public class splashScreen extends AppCompatActivity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
+        Context context = this;
         super.onCreate(icicle);
         setContentView(R.layout.activity_splash_screen);
         getSupportActionBar().hide();
@@ -36,9 +38,8 @@ public class splashScreen extends AppCompatActivity {
             @Override
             public void run() {
                 String usernameReturn = new String();
-                if(checkSignInUser(usernameReturn)) {
+                if(checkSignInUser(usernameReturn) || !Utils.isNetworkAvailable(context)) {
                     Intent intent = new Intent(getBaseContext(), MapsActivity.class);
-                    intent.putExtra("username", usernameReturn);
                     startActivity(intent);
                     finish();
                 }else {

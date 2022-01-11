@@ -39,9 +39,9 @@ public class SignUpUser extends AsyncTask<String, String, Integer> {
         Integer result;
         try {
             JSONObject postData = new JSONObject();
-            postData.put("username", user.getUsername());
-            postData.put("password", user.getPassword());
-            URL databaseEndpoint = new URL("https://diplomski-projekt.herokuapp.com/api/korisnici/registration");
+            postData.put("korisnickoIme", user.getUsername());
+            postData.put("lozinka", user.getPassword());
+            URL databaseEndpoint = new URL("https://diplomski-projekt.herokuapp.com/api/korisnici");
             HttpsURLConnection myConnection = (HttpsURLConnection) databaseEndpoint.openConnection();
             try {
                 myConnection.setRequestProperty("Content-Type", "application/json");

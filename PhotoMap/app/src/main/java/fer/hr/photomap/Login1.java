@@ -42,12 +42,18 @@ public class Login1 extends AppCompatActivity{
                     @Override
                     public void processFinish(Integer output) {
                         if(output != 0) {
+                            int returnFromMapsAc = getIntent().getIntExtra("AnonLogin", 35);
                             Toast.makeText(Login1.this, "Prijavljen korisnik " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(getBaseContext(), MapsActivity.class);
                             SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                             editor.putString("username", usernameL.getText().toString());
                             editor.apply();
-                            startActivity(intent);
+                            if(returnFromMapsAc != 30) {
+                                Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+                                startActivity(intent);
+                            }else {
+                                Intent intent = new Intent();
+                                setResult(RESULT_OK, intent);
+                            }
                             finish();
                         }else{
                             Toast.makeText(Login1.this, "Nije uspjela prijava", Toast.LENGTH_LONG).show();
