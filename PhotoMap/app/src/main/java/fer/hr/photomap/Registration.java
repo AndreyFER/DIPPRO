@@ -14,9 +14,7 @@ import com.google.android.material.button.MaterialButton;
 import java.io.IOException;
 
 import fer.hr.photomap.data.AsyncResponse;
-import fer.hr.photomap.data.SignInUser;
 import fer.hr.photomap.data.SignUpUser;
-import fer.hr.photomap.data.UploadEvent;
 import fer.hr.photomap.data.model.User;
 
 public class Registration extends AppCompatActivity{
@@ -71,7 +69,7 @@ public class Registration extends AppCompatActivity{
         signinbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), Login1.class);
+                Intent intent = new Intent(getBaseContext(), Login.class);
                 startActivity(intent);
             }
         });

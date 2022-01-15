@@ -6,20 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 
-import java.io.IOException;
-
 import fer.hr.photomap.data.AsyncResponse;
 import fer.hr.photomap.data.SignInUser;
-import fer.hr.photomap.data.SignUpUser;
 import fer.hr.photomap.data.model.User;
 
-public class Login1 extends AppCompatActivity {
+public class Login extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +39,7 @@ public class Login1 extends AppCompatActivity {
                     public void processFinish(Integer output) {
                         if (output != 0) {
                             int returnFromMapsAc = getIntent().getIntExtra("AnonLogin", 0);
-                            Toast.makeText(Login1.this, "Logged in as user " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(Login.this, "Logged in as user " + usernameL.getText().toString(), Toast.LENGTH_LONG).show();
                             SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                             editor.putString("username", usernameL.getText().toString());
                             editor.apply();
@@ -56,7 +52,7 @@ public class Login1 extends AppCompatActivity {
                             }
                             finish();
                         } else {
-                            Toast.makeText(Login1.this, "Login failed", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Login.this, "Login failed", Toast.LENGTH_LONG).show();
                         }
                     }
                 }).execute();

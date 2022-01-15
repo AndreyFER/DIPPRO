@@ -41,7 +41,6 @@ public class splashScreen extends AppCompatActivity {
                 if(checkSignInUser(usernameReturn) || !Utils.isNetworkAvailable(context)) {
                     Intent intent = new Intent(getBaseContext(), MapsActivity.class);
                     startActivity(intent);
-                    finish();
                 }else {
                     Intent intent = new Intent(getBaseContext(), Registration.class);
                     startActivity(intent);

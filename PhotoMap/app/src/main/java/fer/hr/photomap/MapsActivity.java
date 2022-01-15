@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.metrics.Event;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,21 +19,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.StringJoiner;
 import java.util.concurrent.ExecutionException;
 
 import fer.hr.photomap.data.FetchEvents;
@@ -95,7 +88,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         signOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getBaseContext(), Login1.class);
+                Intent intent = new Intent(getBaseContext(), Login.class);
                 SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                 editor.putString("username", "No username defined");
                 editor.apply();
@@ -155,7 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     ////ispod je dodatak u slucaju anonymousa da ga salje na login kad uhvati internet
                     if (username.equals("Anonymous user")) {
-                        Intent intent = new Intent(getBaseContext(), Login1.class);
+                        Intent intent = new Intent(getBaseContext(), Login.class);
                         SharedPreferences.Editor editor = getSharedPreferences("PrefFile", MODE_PRIVATE).edit();
                         editor.putString("username", "No username defined");
                         editor.apply();

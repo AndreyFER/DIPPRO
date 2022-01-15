@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Login1"
+            android:name=".Login"
             android:exported="false" />
         <activity
             android:name=".Registration"
