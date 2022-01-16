@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="types_array">
-        <item>Priroda</item>
-        <item>Grad</item>
+        <item>Nature</item>
+        <item>City</item>
+        <item>Mountain</item>
+        <item>River</item>
     </string-array>
 </resources>
