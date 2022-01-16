@@ -5,5 +5,7 @@
         <item>City</item>
         <item>Mountain</item>
         <item>River</item>
+        <item>Priroda</item>
+        <item>Grad</item>
     </string-array>
 </resources>

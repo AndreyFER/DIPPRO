@@ -7,10 +7,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -141,13 +144,22 @@ public class AddItem extends AppCompatActivity {
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PROVIDER="CAMERA";
-                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                ImagePicker.Companion.with(AddItem.this)
-                        .provider(ImageProvider.CAMERA)
-                        .compress(1048)//maksimalna velicina slike u KB
-                        .maxResultSize(650,650)
-                        .start();
+                if(Utils.isNetworkAvailable(context)) {
+                    PROVIDER = "CAMERA";
+                    Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    ImagePicker.Companion.with(AddItem.this)
+                            .provider(ImageProvider.CAMERA)
+                            .compress(1048)//maksimalna velicina slike u KB
+                            .maxResultSize(650, 650)
+                            .start();
+                } else {
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    try {
+                        startActivityForResult(takePictureIntent, 1);
+                    } catch (Exception e) {
+                        Toast.makeText(context, "Camera error", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -186,29 +198,27 @@ public class AddItem extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.i("pazaz", String.valueOf(resultCode));
+        if (resultCode == 0) return;
+        if ( resultCode == RESULT_OK) {
+                if(requestCode == ImagePicker.REQUEST_CODE){
+                    imageUri = data.getData();
+                    imageShow.setImageURI(imageUri);
+                } else if(requestCode == 1 ){
+                    Bundle extras = data.getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    imageShow.setImageBitmap(imageBitmap);
+                    imageUri = Utils.getImageUri(context, imageBitmap);
+                }
 
-        if (requestCode == ImagePicker.REQUEST_CODE) {
-            if (resultCode == AddItem.RESULT_OK) {
-
-                imageUri = data.getData();
-                imageShow.setImageURI(imageUri);
                 imageSet = true;
 
-                if(imageSet && descriptionText.getText().length() > 0){
-                    if(!locationEnabled && latitudeText.getText().length() > 0 && longitudeText.getText().length() > 0)
+                if (imageSet && descriptionText.getText().length() > 0) {
+                    if (!locationEnabled && latitudeText.getText().length() > 0 && longitudeText.getText().length() > 0)
                         saveButton.setEnabled(true);
                     else if (locationEnabled) saveButton.setEnabled(true);
                 }
-                //You can get File object from intent
-                //File file = ImagePicker.Companion.getFile(data);
 
-                //You can also get File Path from intent
-                //String filePath = ImagePicker.Companion.getFilePath(data);
-
-
-            } else if (resultCode == ImagePicker.RESULT_ERROR) {
-                Toast.makeText(this, ImagePicker.Companion.getError(data), Toast.LENGTH_SHORT).show();
-            }
         } else {
             Toast.makeText(this, "Ne bi trebao dobiti ovu gresku", Toast.LENGTH_SHORT).show();
         }
