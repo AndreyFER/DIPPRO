@@ -116,7 +116,7 @@ public class FetchEvents extends AsyncTask<String, String, String> {
 
                     EventData eventData = new EventData(description, latitude, longitude, image, type, username);
                     Log.d("event", eventData.toString());
-                    if(i%2 == 0) Utils.addMarkerToMap(mMap, eventData);
+                    Utils.addMarkerToMap(mMap, eventData);
                 }
 
             } catch (JSONException e) {
